@@ -1,0 +1,66 @@
+body {
+  position: relative;
+  height: 90vh;
+  width: 100%;
+}
+
+section {
+  width: 350px;
+}
+
+section article span {
+  display: block;
+  cursor: pointer;
+  margin: 0.4em;
+  text-transform: capitalize;
+}
+
+* {
+  transition: all ease-in 0.1s;
+}
+
+.delete-icon:hover {
+  color: red;
+}
+
+.todoList {
+  max-height: 200px;
+  overflow-y: scroll;
+  padding: 1px;
+  width: 80%;
+}
+
+.todoList::-webkit-scrollbar {
+  display: none;
+}
+
+button:focus,
+button:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.alert-danger-display {
+  display: none;
+}
+
+.alert-danger {
+  width: 90%;
+  position: absolute;
+  bottom: 0px;
+}
+
+label {
+  display: block; 
+  word-wrap: break-word;
+  white-space: normal;
+  max-width: 170px; 
+}
+
+
+label {
+  display: block; 
+  word-wrap: break-word;
+  white-space: normal;
+  max-width: 170px; 
+}
