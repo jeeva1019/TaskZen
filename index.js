@@ -12,7 +12,7 @@ let optionContainer = document.querySelector(".chooseContainer");
 let todoList = document.querySelector(".todoList");
 let taskList = new Map(); // Stores tasks as key-value pairs (task text -> completion status)
 let selectedOpt = ""; // Tracks the current filter selection
-let taskInfo = document.getElementsByTagName('p');
+let taskInfo = document.getElementById("taskStatus");
 
 /**
  * Retrieves saved tasks from localStorage and loads them into taskList.
@@ -24,10 +24,7 @@ function loadFromLocalStorage() {
   }
 }
 
-loadFromLocalStorage();
-
 // Register event for the add task button
-
 document.querySelector(".addTask").addEventListener("click", addTaskIntoTodo);
 
 /**
@@ -37,7 +34,16 @@ document.querySelector(".addTask").addEventListener("click", addTaskIntoTodo);
  */
 function createTaskElement(taskTxt, checkFlag) {
   let mainContainer = document.createElement("div");
-  mainContainer.classList.add("border", "rounded-3", "px-3", "py-2", "mb-3", "d-flex", "align-items-center", "justify-content-between");
+  mainContainer.classList.add(
+    "border",
+    "rounded-3",
+    "px-3",
+    "py-2",
+    "mb-3",
+    "d-flex",
+    "align-items-center",
+    "justify-content-between"
+  );
 
   let innerContainer = document.createElement("div");
   innerContainer.classList.add("form-check", "mx-2");
@@ -60,10 +66,6 @@ function createTaskElement(taskTxt, checkFlag) {
   mainContainer.appendChild(getDeleteIcon());
 
   todoList.appendChild(mainContainer);
-
-  taskInfo[0].textContent = findTaskStatus();
-
-  console.log(taskInfo)
 }
 
 /**
@@ -95,13 +97,21 @@ function showAlert() {
 /**
  * Adds a task to the to-do list and updates localStorage.
  */
-function addTaskIntoTodo() {
+function addTaskIntoTodo(event) {
   let inputTxt = document.getElementsByTagName("input")[0];
   if (!inputTxt.value) return showAlert();
   createTaskElement(inputTxt.value, false);
   taskList.set(inputTxt.value, false);
   saveToLocalStorage();
+  taskInfo.textContent = findTaskStatus();
   inputTxt.value = "";
+  findSelectNav();
+}
+
+function findSelectNav() {
+  Array.from(optionContainer.children).forEach((ele)=> {
+    if (ele.classList.contains('btn-dark')) sparation(ele.innerText);
+  });
 }
 
 /**
@@ -122,33 +132,33 @@ todoList.addEventListener("click", (e) => {
     e.target.parentElement.parentElement.classList.toggle("bg-light");
     saveToLocalStorage();
     sparation(selectedOpt);
+    taskInfo.textContent = findTaskStatus();
   } else if (e.target.closest(".delete-icon")) {
     let key = e.target.closest(".border").querySelector("label").innerText;
     taskList.delete(key);
     saveToLocalStorage();
     sparation(selectedOpt);
     e.target.closest(".border").remove();
+    taskInfo.textContent = findTaskStatus();
   }
 });
 
 // Creating filter buttons (All, Active, Completed)
-["All", "Active", "Completed"].forEach((ele, idx) => {
-  let btn = document.createElement("button");
-  btn.innerText = ele;
-  btn.classList.add("btn", "switchOption", "rounded-3");
-  if (idx === 0) btn.classList.add("btn-dark");
-  optionContainer.appendChild(btn);
-});
+function initializeNavigator() {
+  ["All", "Active", "Completed"].forEach((ele, idx) => {
+    let btn = document.createElement("button");
+    btn.innerText = ele;
+    btn.classList.add("btn", "switchOption", "rounded-3");
+    if (idx === 0) btn.classList.add("btn-dark");
+    optionContainer.appendChild(btn);
+  });
+}
 
-// Adding event listeners to filter buttons
-Array.from(optionContainer.children).forEach((ele) => {
-  ele.addEventListener("click", () => {
-    Array.from(optionContainer.children).forEach((innerEle) => {
-      innerEle.classList.toggle("btn-dark", innerEle === ele);
-      if (innerEle === ele) {
-        sparation(innerEle.innerText);
-      }
-    });
+optionContainer.addEventListener("click", (event) => {
+  Array.from(optionContainer.children).forEach((ele) => {
+    ele.classList.toggle("btn-dark", event.target.innerText === ele.innerText);
+    if (event.target.innerText === ele.innerText)
+      return sparation(ele.innerText);
   });
 });
 
@@ -159,11 +169,17 @@ Array.from(optionContainer.children).forEach((ele) => {
 function sparation(mode) {
   todoList.innerHTML = "";
   selectedOpt = mode;
-  taskList.forEach((item, idx) => {
-    if ((mode === "Completed" && item) || (mode === "Active" && !item) || mode === "All") {
-      createTaskElement(idx, item);
+  taskList.forEach((value, key) => {
+    if (
+      (mode === "Completed" && value) ||
+      (mode === "Active" && !value) ||
+      mode === "All"
+    ) {
+      createTaskElement(key, value);
     }
   });
+  taskInfo.textContent = findTaskStatus();
+
   noTask(todoList.children.length, mode);
 }
 
@@ -181,11 +197,8 @@ function noTask(arr, mode) {
   }
 }
 
-
-
 function findTaskStatus() {
   let cmpltCnt = 0;
-
   taskList.forEach((item) => {
     if (item) {
       cmpltCnt++;
@@ -195,6 +208,8 @@ function findTaskStatus() {
   return `${taskList.size} tasks • ${cmpltCnt} completed`;
 }
 
-
-// Initialize UI with stored tasks
-sparation("All");
+document.addEventListener("DOMContentLoaded", () => {
+  loadFromLocalStorage();
+  sparation("All");
+  initializeNavigator();
+});
